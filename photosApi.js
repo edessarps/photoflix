@@ -76,22 +76,13 @@ async function ensureToken({forceFresh=false} = {}) {
   const stillValid = token && Date.now() < tokenExp;
   if (stillValid && !forceFresh) return token;
 
-  // Force un nouveau token et un re-consent explicite
-  await signIn({ forceConsent: true });
+  // Demande un nouveau token (et potentiellement un re-consent)
+  await signIn({ forceConsent: false }); // <- `false` est la valeur par défaut
   return token;
 }
 
 async function gFetch(url, opts = {}) {
-  // <- forceFresh: true le temps du diagnostic
-  const t = await ensureToken({ forceFresh: true });
-
-  // DIAGNOSTIC: montre les scopes du token utilisé pour CET appel
-  try {
-    const info = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + t).then(r => r.json());
-    console.log('[Photosflix] TOKEN USED SCOPES:', info.scope);
-  } catch (e) {
-    console.warn('[Photosflix] tokeninfo check failed:', e);
-  }
+  const t = await ensureToken();
 
   const res = await fetch(url, {
     ...opts,
