@@ -75,7 +75,7 @@ async function ensureToken({ forceFresh = false } = {}) {
 }
 
 async function gFetch(url, opts = {}) {
-  const t = await ensureToken({ forceFresh: true }); // en debug: token tout frais
+  const t = await ensureToken();
   try {
     const info = await fetch(
       "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + t
