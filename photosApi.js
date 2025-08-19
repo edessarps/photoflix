@@ -70,36 +70,44 @@ export function signOut() {
   window.accessToken = null;
 }
 
-async function ensureToken() {
+async function ensureToken({forceFresh=false} = {}) {
   if (!USE_LIVE_API) throw new Error('Live API disabled');
-  if (token && Date.now() < tokenExp) return token;
-  // Si on n’a pas encore de token ou s’il est expiré, relance le flux
-  await signIn({ forceConsent: false });
+
+  const stillValid = token && Date.now() < tokenExp;
+  if (stillValid && !forceFresh) return token;
+
+  // Force un nouveau token et un re-consent explicite
+  await signIn({ forceConsent: true });
   return token;
 }
 
 async function gFetch(url, opts = {}) {
-  const t = await ensureToken();
+  // <- forceFresh: true le temps du diagnostic
+  const t = await ensureToken({ forceFresh: true });
+
+  // DIAGNOSTIC: montre les scopes du token utilisé pour CET appel
+  try {
+    const info = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + t).then(r => r.json());
+    console.log('[Photosflix] TOKEN USED SCOPES:', info.scope);
+  } catch (e) {
+    console.warn('[Photosflix] tokeninfo check failed:', e);
+  }
+
   const res = await fetch(url, {
     ...opts,
     headers: { ...(opts.headers || {}), Authorization: `Bearer ${t}` },
   });
 
   if (!res.ok) {
-    const bodyText = await res.text().catch(() => '');
-    // Log détaillé côté console pour le debug
-    console.error('[Photosflix] HTTP error', res.status, bodyText);
-    let parsed;
-    try { parsed = JSON.parse(bodyText); } catch { parsed = { error: { message: bodyText } }; }
-
-    // Message utile côté UI si on veut alerter
-    if (res.status === 403 && /insufficient/i.test(bodyText)) {
+    const body = await res.text().catch(() => '');
+    console.error('[Photosflix] HTTP error', res.status, body);
+    if (res.status === 403 && /insufficient/i.test(body)) {
       alert('Connexion échouée : HTTP 403 — scopes insuffisants.\n' +
-            '• Retire l’accès à l’app dans https://myaccount.google.com/permissions\n' +
-            '• Reconnecte-toi (on redemandera le scope photoslibrary.readonly).');
+            '• Retire l’accès à l’app : https://myaccount.google.com/permissions\n' +
+            '• Recharge la page et reconnecte-toi (photoslibrary.readonly).');
     }
     const err = new Error(`HTTP ${res.status}`);
-    err.details = parsed;
+    try { err.details = JSON.parse(body); } catch { err.details = { error: { message: body } }; }
     throw err;
   }
   return res.json();
