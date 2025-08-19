@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Photosflix — Web</title>
+    <meta name="description" content="Netflix pour mes photos Google — version web" />
+    <link rel="stylesheet" href="./style.css" />
+    <!-- Google Identity Services (OAuth 2.0 token model) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">Photosflix</div>
+      <div class="search-wrap">
+        <input id="searchInput" placeholder="Rechercher un album…" aria-label="Rechercher" />
+      </div>
+      <div class="auth-wrap">
+        <button id="signinBtn" class="btn">Se connecter</button>
+        <button id="signoutBtn" class="btn btn-ghost" hidden>Se déconnecter</button>
+      </div>
+    </header>
+
+    <main id="app">
+      <section id="hero" class="hero hidden"></section>
+
+      <section id="continue" class="row hidden">
+        <h2>Reprendre</h2>
+        <div class="row-scroll" id="continueRow"></div>
+      </section>
+
+      <section id="mylist" class="row hidden">
+        <h2>Ma liste</h2>
+        <div class="row-scroll" id="myListRow"></div>
+      </section>
+
+      <section id="albums" class="row">
+        <h2>Albums</h2>
+        <div class="row-scroll" id="albumsRow"></div>
+      </section>
+
+      <section id="demoNote" class="note">
+        <p>Mode démo : connecte-toi à Google pour charger tes albums Google Photos.</p>
+      </section>
+    </main>
+
+    <div id="player" class="player hidden" role="dialog" aria-modal="true" aria-label="Lecteur diaporama">
+      <button class="player-close" id="playerClose" aria-label="Fermer">×</button>
+      <div class="player-body">
+        <img id="playerImage" alt="Photo en lecture" />
+        <div class="player-controls">
+          <button id="prevBtn" class="btn btn-ghost" aria-label="Précédent">‹</button>
+          <button id="playPauseBtn" class="btn" aria-label="Pause/Lecture">Pause</button>
+          <button id="nextBtn" class="btn btn-ghost" aria-label="Suivant">›</button>
+          <div class="progress-wrap">
+            <div id="playerProgress" class="progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <small>© 2025 Photosflix — Prototype web (Google Photos en lecture seule)</small>
+    </footer>
+  </body>
+</html>
