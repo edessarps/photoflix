@@ -1,7 +1,7 @@
 // config.js
 // IMPORTANT : ne JAMAIS mettre le client_secret côté front
 export const GOOGLE_CLIENT_ID =
-  "240084222867-jtrid9bq2ihr05ma51htuis5tkueinsg.apps.googleusercontent.com";
+  "240084222867";
 
 export const USE_LIVE_API = true;
 
